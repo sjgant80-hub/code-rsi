@@ -13,7 +13,7 @@ const big = (n) => Number(n).toLocaleString('en-GB');
 const chip = (pass) => el('span', { class: 'chip ' + (pass ? 'win' : 'bad') }, pass ? 'HELD' : 'FAILED');
 
 let REC = null, RA = null, RF = null, GATES = [], BASIS = null;
-const PLAIN = { R1: 'It improved itself, on writers it never trained on', R2: 'And with a quarter of the pixels replaced', R3: 'Settling beats reading the same shape in one step (Rung 1\'s T7, retaken)',
+const PLAIN = { R1: 'It improved itself, on a blind half it never trained on', R2: 'And with a quarter of the pixels replaced', R3: 'Settling beats reading the same shape in one step (Rung 1\'s T7, retaken)',
   R4: 'The recursive turn pays: the adaptive loop beats its frozen twin', R6: 'Every change earned its place: the gate held both ways', R9: 'Every settle stopped' };
 function shown(v) {
   const m = v.measured;
@@ -45,7 +45,7 @@ function fillResult() {
     el('div', { class: 'card' }, el('div', { class: 'k' }, 'The search it learned'), el('div', { class: 'big' }, L.OPS[RA.weights.indexOf(Math.max(...RA.weights))]), el('div', { class: 'vs' }, 'the edit the adaptive loop came to favour most. Final weights: ' + L.OPS.map((o, i) => o + ' ' + RA.weights[i]).join(', ') + '.')));
   const vf = (id) => v.find((x) => x.id === id) || {};
   const gain = r.star.clean - r.s0.clean;
-  $('lesson').textContent = 'With no model anywhere, the loop took Rung 1\'s cell from ' + pct(r.s0.clean) + ' to ' + pct(r.star.clean) + ' on writers it never trained on (' + (gain >= 0 ? '+' : '−') + Math.abs(gain * 100).toFixed(1) + ' points), and from ' + pct(r.s0.n25) + ' to ' + pct(r.star.n25) + ' with a quarter of the pixels replaced. ' +
+  $('lesson').textContent = 'With no model anywhere, the loop took Rung 1\'s cell from ' + pct(r.s0.clean) + ' to ' + pct(r.star.clean) + ' on the blind half it never trained on (' + (gain >= 0 ? '+' : '−') + Math.abs(gain * 100).toFixed(1) + ' points), and from ' + pct(r.s0.n25) + ' to ' + pct(r.star.n25) + ' with a quarter of the pixels replaced. ' +
     'Storing every tune-half digit and taking the nearest scores ' + pct(r.nnTune) + ', so the evolved shape is ' + (r.star.clean >= r.nnTune ? 'level with or above' : 'still below') + ' that reference while keeping 200 patterns. ' +
     (vf('R3').pass ? 'Settling now beats reading the same shape in one step, the claim Rung 1 failed. ' : 'Settling still does not beat reading the same shape in one step (' + pct(r.star.n25) + ' vs ' + pct(r.star.n25One) + ' at 25% noise; ' + pct(r.star.clean) + ' vs ' + pct(r.star.cleanOne) + ' clean): Rung 1\'s open question stays open. ') +
     (vf('R4').pass ? 'The recursive turn paid: the loop that retuned its own search beat its frozen twin.' : 'The recursive turn did not pay on this budget: the loop that retuned its own search did not beat its frozen twin (' + pct(r.star.clean) + ' vs ' + pct(r.twin.clean) + ' clean).');

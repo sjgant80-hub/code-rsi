@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Code RSI · a cell that improves itself with no model</title>
-<meta name="description" content="Rung 2 of the geometric ladder: plain code rewrites a settling cell on fresh exams each cycle and tunes its own search, with no model, then is judged once on writers it never trained on.">
+<meta name="description" content="Rung 2 of the geometric ladder: plain code rewrites a settling cell on fresh exams each cycle and tunes its own search, with no model, then is judged once on a blind half it never trained on, very likely by other writers.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
 <style>
 :root{--bg:#f7f5f0;--panel:#ffffff;--ink:#1d1c1a;--muted:#6b665c;--line:rgba(29,28,26,.12);--accent:#3f6b47;--accent-dim:rgba(63,107,71,.10);--win:#2f7a3d;--tie:#a5701c;--bad:#b3452c;--px0:#ffffff;--px1:#1d1c1a;--mono:'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace;--sans:'Inter',-apple-system,system-ui,sans-serif;--serif:'Cormorant Garamond','Iowan Old Style',Georgia,serif}
@@ -78,7 +78,7 @@ footer p+p{margin-top:6px}
 </nav>
 <header class="hero">
   <h1>A cell that improves itself, with no model.</h1>
-  <p class="lede">Rung 1's settling cell met 80 new writers whose digits were scanned differently. Here, plain code rewrites the cell's stored patterns one small change at a time. Each change is kept only if it wins on a fresh exam the cell has never seen, and the loop also retunes its own search from what it measures. No language model, no gradient, no network. Then it is judged once on writers it never trained on.</p>
+  <p class="lede">Rung 1's settling cell met 80 new writers whose digits were scanned differently. Here, plain code rewrites the cell's stored patterns one small change at a time. Each change is kept only if it wins on a fresh exam the cell has never seen, and the loop also retunes its own search from what it measures. No language model, no gradient, no network. Then it is judged once on a blind half it never trained on, very likely written by other people.</p>
   <p class="verdictline" id="verdictline">Loading the record…</p>
 </header>
 <main>
@@ -88,7 +88,7 @@ footer p+p{margin-top:6px}
   <p class="muted">Each claim was written down with its bar before any code existed (<a href="CLAIMS.md">CLAIMS.md</a>, seal 1). The final shapes were frozen by hash before the blind half was read (<a href="SEAL2.md">SEAL2.md</a>). A claim that misses its bar is kept and shown as failed. Every number here is read from the committed record, not typed in.</p>
   <div class="tablewrap"><table id="claims"><thead><tr><th>Claim</th><th>What it says</th><th>Measured</th><th>Bar</th><th>Verdict</th></tr></thead><tbody></tbody></table></div>
   <h3>The three shapes on the blind half</h3>
-  <div class="tablewrap"><table id="shapes3"><thead><tr><th>On writers the loop never trained on</th><th>Rung 1's cell (S0)</th><th>After the loop (S*)</th><th>The frozen-weights twin</th></tr></thead><tbody></tbody></table></div>
+  <div class="tablewrap"><table id="shapes3"><thead><tr><th>On the blind half (very likely other writers)</th><th>Rung 1's cell (S0)</th><th>After the loop (S*)</th><th>The frozen-weights twin</th></tr></thead><tbody></tbody></table></div>
   <div class="cards" id="refs"></div>
   <h3>What the result says</h3>
   <p id="lesson">…</p>
@@ -120,7 +120,7 @@ footer p+p{margin-top:6px}
 
 <section id="what">
   <h2>What this is</h2>
-  <p>This is Rung 2 of a ladder toward computing by geometry instead of by large models. Rung 1 built a cell that reads handwriting by settling into one of a few stored patterns. Rung 2 asks whether that cell can get better by itself: can plain code, with no model inside, change the stored patterns so the cell reads new handwriting better, and prove the gain on people it never trained on?</p>
+  <p>This is Rung 2 of a ladder toward computing by geometry instead of by large models. Rung 1 built a cell that reads handwriting by settling into one of a few stored patterns. Rung 2 asks whether that cell can get better by itself: can plain code, with no model inside, change the stored patterns so the cell reads new handwriting better, and prove the gain on digits it never trained on, very likely from other people?</p>
   <p>That matters for the later rungs. A microcontroller cannot hold a model. If a defence on a chip is going to improve itself, the improvement has to come from code like this. What the later rungs found, held and failed, is on the <a href="https://sjgant80-hub.github.io/geometric-ladder/">ladder page</a>.</p>
 </section>
 
@@ -133,8 +133,9 @@ footer p+p{margin-top:6px}
     <tr><td><b>Cycle, edit</b></td><td>One turn of the loop: code makes one small edit to the shape (six kinds, listed under How it works) and tests it.</td></tr>
     <tr><td><b>Exam, gate</b></td><td>Each cycle draws a fresh batch of training digits. The edit is kept only if, on that batch, the edited shape gets at least two more digits right than the old one.</td></tr>
     <tr><td><b>Weights</b></td><td>How often each kind of edit is tried. The adaptive run raises the weight of kinds that get kept and lowers the rest.</td></tr>
-    <tr><td><b>Twin</b></td><td>The same loop with its weights frozen: the control that shows whether adapting the weights helped.</td></tr>
-    <tr><td><b>Blind half</b></td><td>Half of the Semeion digits, never used by the loop, read once at the end to judge it.</td></tr>
+    <tr><td><b>The recursive turn</b></td><td>The loop changing its own search, not just the shape: the edit weights adapt to what has been paying off. Whether that helped is claim R4, judged against the twin.</td></tr>
+    <tr><td><b>Twin</b></td><td>The same loop with its weights frozen: the control that shows whether adapting the weights helped. Its frozen weights are numbers in code, not a model.</td></tr>
+    <tr><td><b>Blind half, strangers</b></td><td>Half of the Semeion digits, never used by the loop, read once at the end to judge it. "Strangers" means those digits; Semeion does not record who wrote each digit, so the split cannot be proven writer-disjoint (stated in the limits).</td></tr>
     <tr><td><b>One-step read</b></td><td>Reading the same digit with the same shape without settling. The fair baseline for settling, and the one it lost to (R3).</td></tr>
     <tr><td><b>No model</b></td><td>No neural network is trained anywhere. The only learning is edits kept by the gate.</td></tr>
     <tr><td><b>Seal, mutation gate</b></td><td>Seal: the claims, then the frozen results, committed to the public record before the blind half is read. Mutation gate: a tool (witness) that breaks the code in small ways and checks the tests catch every break.</td></tr>
