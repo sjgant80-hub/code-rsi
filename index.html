@@ -74,7 +74,7 @@ footer p+p{margin-top:6px}
 </head>
 <body>
 <nav class="top" aria-label="Sections">
-  <a href="#result">The result</a><a href="#evolve">Watch it evolve</a><a href="#shapes">Before and after</a><a href="#rerun">Re-run it</a><a href="#start">Start here</a><a href="#how">How it works</a><a href="#blueprint">Blueprint</a><a href="#adoption">Adoption</a><a href="#paper">White paper</a><a href="#business">For business</a>
+  <a href="#result">The result</a><a href="#evolve">Watch it evolve</a><a href="#shapes">Before and after</a><a href="#rerun">Re-run it</a><a href="#words">Words</a><a href="#start">Start here</a><a href="#how">How it works</a><a href="#blueprint">Blueprint</a><a href="#adoption">Adoption</a><a href="#paper">White paper</a><a href="#business">For business</a>
 </nav>
 <header class="hero">
   <h1>A cell that improves itself, with no model.</h1>
@@ -121,7 +121,24 @@ footer p+p{margin-top:6px}
 <section id="what">
   <h2>What this is</h2>
   <p>This is Rung 2 of a ladder toward computing by geometry instead of by large models. Rung 1 built a cell that reads handwriting by settling into one of a few stored patterns. Rung 2 asks whether that cell can get better by itself: can plain code, with no model inside, change the stored patterns so the cell reads new handwriting better, and prove the gain on people it never trained on?</p>
-  <p>That matters for the later rungs. A microcontroller cannot hold a model. If a defence on a chip is going to improve itself, the improvement has to come from code like this.</p>
+  <p>That matters for the later rungs. A microcontroller cannot hold a model. If a defence on a chip is going to improve itself, the improvement has to come from code like this. What the later rungs found, held and failed, is on the <a href="https://sjgant80-hub.github.io/geometric-ladder/">ladder page</a>.</p>
+</section>
+
+<section id="words">
+  <h2>Words on this page</h2>
+  <div class="tablewrap"><table>
+    <tr><td><b>Cell, shape</b></td><td>The cell is the small reader; its shape is what it reads with: stored digit patterns plus two numbers that set how widely each pattern pulls.</td></tr>
+    <tr><td><b>S0, S*</b></td><td>S0 is Rung 1's cell, the starting shape. S* is the shape the loop ends with.</td></tr>
+    <tr><td><b>Settle</b></td><td>How the cell reads: it flips the digit's bits one at a time towards its stored patterns until nothing more changes, and answers with the class it ends up nearest.</td></tr>
+    <tr><td><b>Cycle, edit</b></td><td>One turn of the loop: code makes one small edit to the shape (six kinds, listed under How it works) and tests it.</td></tr>
+    <tr><td><b>Exam, gate</b></td><td>Each cycle draws a fresh batch of training digits. The edit is kept only if, on that batch, the edited shape gets at least two more digits right than the old one.</td></tr>
+    <tr><td><b>Weights</b></td><td>How often each kind of edit is tried. The adaptive run raises the weight of kinds that get kept and lowers the rest.</td></tr>
+    <tr><td><b>Twin</b></td><td>The same loop with its weights frozen: the control that shows whether adapting the weights helped.</td></tr>
+    <tr><td><b>Blind half</b></td><td>Half of the Semeion digits, never used by the loop, read once at the end to judge it.</td></tr>
+    <tr><td><b>One-step read</b></td><td>Reading the same digit with the same shape without settling. The fair baseline for settling, and the one it lost to (R3).</td></tr>
+    <tr><td><b>No model</b></td><td>No neural network is trained anywhere. The only learning is edits kept by the gate.</td></tr>
+    <tr><td><b>Seal, mutation gate</b></td><td>Seal: the claims, then the frozen results, committed to the public record before the blind half is read. Mutation gate: a tool (witness) that breaks the code in small ways and checks the tests catch every break.</td></tr>
+  </table></div>
 </section>
 
 <section id="start">
@@ -179,6 +196,15 @@ footer p+p{margin-top:6px}
     <div class="card"><div class="k">For engineering</div><p style="margin-top:6px">An improvement loop with a hard gate, a fresh exam per cycle, a control twin, and a blind half read once. Every cycle is in the log and re-derives byte for byte, on GitHub's runner and in a tab.</p></div>
     <div class="card"><div class="k">For risk and procurement</div><p style="margin-top:6px">No model, no vendor, no network. The page loads only its own files. The code is MIT, the data and the vendored Rung 1 files are pinned by hash, and the loop's imports are checked by a test.</p></div>
   </div>
+  <h3>A pilot, step by step</h3>
+  <ol>
+    <li>Pick one recognition task you do by hand, with a right answer you can check later.</li>
+    <li>Write down the bars it must meet before anything is built, and seal them.</li>
+    <li>Start from a simple cell, and let the loop improve it on your past cases only, every kept edit logged.</li>
+    <li>Freeze it, then judge it once on a held-out slice it never saw. The fee is due only if it beat your current way.</li>
+    <li>Run it beside your current process, deciding nothing. If it keeps learning in service, every change passes the same gate.</li>
+  </ol>
+  <p class="muted">What it runs on: Node.js 20 or a current browser. No GPU, no cloud service, no model download.</p>
 </section>
 
 <section id="paper">
