@@ -1,0 +1,9 @@
+{
+ "kernel": "src/loop.mjs",
+ "witness": "v0.6",
+ "total": 62,
+ "killed": 62,
+ "survived": 0,
+ "ignored": 0,
+ "clean": true
+}
