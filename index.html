@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Code RSI · a cell that improves itself with no model</title>
+<meta name="description" content="Rung 2 of the geometric ladder: plain code rewrites a settling cell on fresh exams each cycle and tunes its own search, with no model, then is judged once on writers it never trained on.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<style>
+:root{--bg:#f7f5f0;--panel:#ffffff;--ink:#1d1c1a;--muted:#6b665c;--line:rgba(29,28,26,.12);--accent:#3f6b47;--accent-dim:rgba(63,107,71,.10);--win:#2f7a3d;--tie:#a5701c;--bad:#b3452c;--px0:#ffffff;--px1:#1d1c1a;--mono:'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace;--sans:'Inter',-apple-system,system-ui,sans-serif;--serif:'Cormorant Garamond','Iowan Old Style',Georgia,serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1a1e;--panel:#212127;--ink:#e8e4db;--muted:#928d80;--line:rgba(232,228,219,.12);--accent:#7a9c7e;--accent-dim:rgba(122,156,126,.14);--win:#7acc85;--tie:#d4a052;--bad:#d67a5a;--px0:#212127;--px1:#e8e4db}}
+:root[data-theme="dark"]{--bg:#1a1a1e;--panel:#212127;--ink:#e8e4db;--muted:#928d80;--line:rgba(232,228,219,.12);--accent:#7a9c7e;--accent-dim:rgba(122,156,126,.14);--win:#7acc85;--tie:#d4a052;--bad:#d67a5a;--px0:#212127;--px1:#e8e4db}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none !important}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+main{max-width:1040px;margin:0 auto;padding:0 16px 64px}
+nav.top{position:sticky;top:0;z-index:3;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:14px;flex-wrap:wrap;padding:8px 16px;font-family:var(--mono);font-size:12px}
+nav.top a{color:var(--muted);text-decoration:none} nav.top a:hover{color:var(--accent)}
+header.hero{max-width:1040px;margin:0 auto;padding:36px 16px 10px}
+h1{font-family:var(--serif);font-size:clamp(34px,6vw,58px);line-height:1.05;font-weight:600}
+.lede{font-size:19px;color:var(--muted);max-width:780px;margin-top:10px}
+.verdictline{font-size:17px;margin-top:12px;max-width:780px}
+section{margin-top:40px}
+h2{font-family:var(--serif);font-size:30px;font-weight:600;margin-bottom:8px}
+h3{font-size:16px;margin:16px 0 6px}
+p+p{margin-top:8px} ul,ol{padding-left:22px} li{margin:4px 0}
+.muted{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card .k{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.card .big{font-size:26px;font-weight:600;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.card .vs{font-size:14px;color:var(--muted)}
+.chip{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;padding:2px 10px;border-radius:12px;white-space:nowrap}
+.chip.win{background:color-mix(in srgb,var(--win) 15%,transparent);color:var(--win)} .chip.bad{background:color-mix(in srgb,var(--bad) 15%,transparent);color:var(--bad)}
+.bar{height:10px;border-radius:5px;background:var(--line);margin:3px 0;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .08s linear} .bar.m i{background:var(--muted)}
+button{font:inherit;font-size:15px;color:#fff;background:var(--accent);border:0;border-radius:6px;padding:9px 16px;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--tie);outline-offset:2px}
+button:disabled{opacity:.55;cursor:progress}
+select{font:inherit;font-size:14px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:6px 8px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;margin-top:10px}
+td,th{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tablewrap{overflow-x:auto}
+.ok{color:var(--win);font-weight:600} .no{color:var(--bad);font-weight:600}
+.svgwrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px}
+.svgwrap svg{display:block;min-width:680px;width:100%;height:auto}
+code{font-family:var(--mono);font-size:.88em;background:var(--accent-dim);padding:1px 5px;border-radius:3px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
+.controls label{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--muted)}
+.controls input{width:90px;font:inherit;font-size:14px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:4px 6px}
+.stage{display:grid;grid-template-columns:minmax(200px,280px) 1fr;gap:18px;align-items:start;margin-top:10px}
+.stage canvas{width:100%;height:auto;aspect-ratio:1;border:1px solid var(--line);border-radius:8px;background:var(--px0);image-rendering:pixelated}
+.fits{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:2px 8px;align-items:center;font-family:var(--mono);font-size:12.5px}
+.fits .bar{margin:0}
+.fits .win i{background:var(--win)}
+.fits.wts{grid-template-columns:64px minmax(0,1fr) auto}
+.curve-a{stroke:var(--accent);fill:none;stroke-width:2}.curve-f{stroke:var(--muted);fill:none;stroke-width:2;stroke-dasharray:5 4}.curve-axis{stroke:var(--line);fill:none}.curve-text{fill:var(--muted);font:12px ui-monospace,monospace}.curve-mark{stroke:var(--tie);stroke-width:1.5}
+.readout{font-size:15px;margin-top:8px}
+.memories{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;margin-top:10px}
+.memories figure{text-align:center;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.memories canvas{width:100%;height:auto;aspect-ratio:1;border:1px solid var(--line);border-radius:4px;image-rendering:pixelated;background:var(--px0)}
+.timeline{list-style:none;padding:0;border-left:2px solid var(--accent);margin-top:10px}
+.timeline li{padding:4px 0 8px 14px;position:relative}
+.timeline li::before{content:'';position:absolute;left:-6px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.timeline b{font-family:var(--mono);font-size:12.5px}
+footer{max-width:1040px;margin:0 auto;padding:22px 16px 40px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px}
+footer p+p{margin-top:6px}
+@media (max-width:640px){.stage{grid-template-columns:1fr}.stage canvas{max-width:260px}td,th{padding:6px 5px;font-size:13.5px}}
+</style>
+</head>
+<body>
+<nav class="top" aria-label="Sections">
+  <a href="#result">The result</a><a href="#evolve">Watch it evolve</a><a href="#shapes">Before and after</a><a href="#rerun">Re-run it</a><a href="#start">Start here</a><a href="#how">How it works</a><a href="#blueprint">Blueprint</a><a href="#adoption">Adoption</a><a href="#paper">White paper</a><a href="#business">For business</a>
+</nav>
+<header class="hero">
+  <h1>A cell that improves itself, with no model.</h1>
+  <p class="lede">Rung 1's settling cell met 80 new writers whose digits were scanned differently. Here, plain code rewrites the cell's stored patterns one small change at a time. Each change is kept only if it wins on a fresh exam the cell has never seen, and the loop also retunes its own search from what it measures. No language model, no gradient, no network. Then it is judged once on writers it never trained on.</p>
+  <p class="verdictline" id="verdictline">Loading the record…</p>
+</header>
+<main>
+
+<section id="result">
+  <h2>The result</h2>
+  <p class="muted">Each claim was written down with its bar before any code existed (<a href="CLAIMS.md">CLAIMS.md</a>, seal 1). The final shapes were frozen by hash before the blind half was read (<a href="SEAL2.md">SEAL2.md</a>). A claim that misses its bar is kept and shown as failed. Every number here is read from the committed record, not typed in.</p>
+  <div class="tablewrap"><table id="claims"><thead><tr><th>Claim</th><th>What it says</th><th>Measured</th><th>Bar</th><th>Verdict</th></tr></thead><tbody></tbody></table></div>
+  <h3>The three shapes on the blind half</h3>
+  <div class="tablewrap"><table id="shapes3"><thead><tr><th>On writers the loop never trained on</th><th>Rung 1's cell (S0)</th><th>After the loop (S*)</th><th>The frozen-weights twin</th></tr></thead><tbody></tbody></table></div>
+  <div class="cards" id="refs"></div>
+  <h3>What the result says</h3>
+  <p id="lesson">…</p>
+</section>
+
+<section id="evolve">
+  <h2>Watch it evolve</h2>
+  <p class="muted">Every cycle of both runs, replayed from the committed logs. The line is the running total of the net exam wins of every change the gate kept. The bars are the loop's own operator weights, which the adaptive run rewrites as it goes. Drag the slider to any cycle.</p>
+  <div class="controls"><label>Cycle <input id="cyc" type="range" min="0" max="0" value="0" style="width:220px"></label><span id="cycnote" class="muted"></span></div>
+  <div class="svgwrap"><svg id="curve" viewBox="0 0 900 260" role="img" aria-label="Net exam wins kept over the cycles, adaptive run against the twin"></svg></div>
+  <div class="fits wts" id="weights" style="margin-top:12px"></div>
+</section>
+
+<section id="shapes">
+  <h2>Before and after</h2>
+  <p id="shapenote" class="muted">Loading the shapes…</p>
+  <h3>Rung 1's cell (S0)</h3>
+  <div class="memories" id="mem0"></div>
+  <h3>After the loop (S*)</h3>
+  <div class="memories" id="mem1"></div>
+</section>
+
+<section id="rerun">
+  <h2>Re-run it in your browser</h2>
+  <p>Your tab loads the Semeion file and the three frozen shapes, reads every blind-half digit with each one, clean and with a quarter of the pixels replaced, and hashes the full record. It then re-runs the first cycles of the adaptive loop from Rung 1's cell and checks them against the committed log. It sends nothing anywhere.</p>
+  <div class="controls"><button id="go">Re-run the blind half and the first cycles</button><span id="gostatus" class="muted"></span></div>
+  <div class="tablewrap"><table id="proof" hidden><thead><tr><th>Number</th><th>Your tab</th><th>The record</th><th></th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<section id="what">
+  <h2>What this is</h2>
+  <p>This is Rung 2 of a ladder toward computing by geometry instead of by large models. Rung 1 built a cell that reads handwriting by settling into one of a few stored patterns. Rung 2 asks whether that cell can get better by itself: can plain code, with no model inside, change the stored patterns so the cell reads new handwriting better, and prove the gain on people it never trained on?</p>
+  <p>That matters for the later rungs. A microcontroller cannot hold a model. If a defence on a chip is going to improve itself, the improvement has to come from code like this.</p>
+</section>
+
+<section id="start">
+  <h2>Start here</h2>
+  <ol>
+    <li>Read <a href="#result">The result</a>: every sealed claim, its bar, and whether it held.</li>
+    <li>In <a href="#evolve">Watch it evolve</a>, drag the slider: see which changes were kept and how the loop retuned its own search.</li>
+    <li>Compare <a href="#shapes">Before and after</a>: the patterns Rung 1 grew, and the patterns the loop left.</li>
+    <li>Press <b>Re-run</b>: your tab recomputes the blind-half record and the first loop cycles, and checks both.</li>
+    <li>Want it off this page? Clone the repo and run <code>node --test test/*.test.mjs</code>, <code>node tools/loop.mjs --check</code> and <code>node tools/eval.mjs --check</code>.</li>
+  </ol>
+</section>
+
+<section id="how">
+  <h2>How it works</h2>
+  <div class="svgwrap">
+    <svg viewBox="0 0 900 230" role="img" aria-label="Propose a change, judge it on a fresh exam, keep it only if it clears the gate, retune the proposal weights, repeat">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="currentColor"/></marker></defs>
+      <g fill="none" stroke="currentColor" stroke-width="1.4" style="color:var(--muted)">
+        <rect x="10" y="70" width="160" height="90" rx="10"/><rect x="215" y="70" width="170" height="90" rx="10"/><rect x="430" y="70" width="190" height="90" rx="10"/><rect x="665" y="70" width="225" height="90" rx="10"/>
+        <path d="M170 115H211" marker-end="url(#ar)"/><path d="M385 115H426" marker-end="url(#ar)"/><path d="M620 115H661" marker-end="url(#ar)"/>
+        <path d="M777 160 V200 H90 V164" marker-end="url(#ar)"/>
+      </g>
+      <g font-family="ui-monospace,monospace" font-size="13" fill="currentColor" style="color:var(--ink)">
+        <text x="25" y="100">the current</text><text x="25" y="118">shape: patterns,</text><text x="25" y="136">reach, power</text>
+        <text x="230" y="100">propose one</text><text x="230" y="118">small change, by</text><text x="230" y="136">a weighted pick</text>
+        <text x="445" y="100">a fresh exam:</text><text x="445" y="118">new noisy digits</text><text x="445" y="136">it has never seen</text>
+        <text x="680" y="100">keep it only if</text><text x="680" y="118">wins − losses ≥ 2;</text><text x="680" y="136">retune the weights</text>
+        <text x="300" y="220" style="fill:var(--muted)">repeat; nothing else decides, and no model is consulted</text>
+      </g>
+    </svg>
+  </div>
+  <h3>Step by step</h3>
+  <ol>
+    <li><b>Start.</b> The loop begins from Rung 1's frozen cell, byte for byte. On this new handwriting it is badly matched, because the two datasets frame digits differently.</li>
+    <li><b>Propose.</b> It picks one of six small edits by weight: nudge one pixel of one pattern; replace a pattern with a digit it just got wrong; move a pattern toward a recent mistake; push the wrongly winning pattern away from one; widen or narrow the reach; sharpen or soften the energy.</li>
+    <li><b>Exam.</b> It draws a fresh batch of 100 tune-half digits, each with a fresh 10% of its pixels replaced. No exam item is ever used twice. Both the current shape and the proposal settle every item.</li>
+    <li><b>Gate.</b> The change is kept only if it gets at least two more items right than it newly gets wrong. Otherwise it is thrown away.</li>
+    <li><b>The recursive turn.</b> The loop rewrites its own search. An edit type that keeps paying off gets picked more, and one that keeps failing gets picked less. A twin run with frozen weights is the control.</li>
+    <li><b>Judge once.</b> After 1,500 cycles each, both final shapes were frozen by hash, and only then was the blind half read.</li>
+  </ol>
+</section>
+
+<section id="blueprint">
+  <h2>Blueprint</h2>
+  <div class="cards" id="parts"></div>
+  <h3>The order things happened in, as the git history shows it</h3>
+  <ul class="timeline" id="timeline"></ul>
+</section>
+
+<section id="adoption">
+  <h2>Adoption</h2>
+  <div class="cards">
+    <div class="card"><div class="k">For a business</div><p style="margin-top:6px">A small owned recogniser that adapts to your own inputs without sending them to anyone and without a model to license. It changes only when a change proves itself on fresh cases, and every kept change is logged.</p></div>
+    <div class="card"><div class="k">For engineering</div><p style="margin-top:6px">An improvement loop with a hard gate, a fresh exam per cycle, a control twin, and a blind half read once. Every cycle is in the log and re-derives byte for byte, on GitHub's runner and in a tab.</p></div>
+    <div class="card"><div class="k">For risk and procurement</div><p style="margin-top:6px">No model, no vendor, no network. The page loads only its own files. The code is MIT, the data and the vendored Rung 1 files are pinned by hash, and the loop's imports are checked by a test.</p></div>
+  </div>
+</section>
+
+<section id="paper">
+  <h2>White paper: self-improvement without a model, judged on strangers</h2>
+  <p><b>The question.</b> Most "self-improving AI" today means a large model rewriting things. A chip cannot hold one. Rung 2 asks whether plain code can improve a small settling cell by proposing edits and keeping only those that win on fresh exams, and whether the loop gains anything by tuning its own search.</p>
+  <p><b>The method.</b> UCI's Semeion handwritten digits: 1,593 digits from about 80 people, split 50/50 at a block boundary into a tune half and a blind half, as the dataset's notes recommend. The loop saw only the tune half, 100 fresh noisy exam items per cycle, for 1,500 cycles. A twin ran the same loop with its weights frozen. Both final shapes were frozen by hash before the blind half was read once.</p>
+  <p><b>The results, from the record:</b></p>
+  <ul id="results"></ul>
+  <p><b>The limits, plainly:</b></p>
+  <ul>
+    <li>Rung 1's cell starts badly on this data, because Semeion digits fill their box while the optical digits have margins. Beating it was the easy part; the harder claims are settling against one step, and the recursive turn against its twin.</li>
+    <li>Writer IDs are not in the dataset. The split falls on a block boundary that looks like a group of writers, so writer-disjoint halves are likely, not proven.</li>
+    <li>Exam items reuse tune digits under fresh noise. No item repeats, but the digits do, so a gain on the tune half alone proves nothing. Only the blind half counts.</li>
+    <li>One task, one dataset, one budget. Rung 2 is not a hybrid with step-code (Rung 3), not shared over a mesh (Rung 4), not a defence (Rung 5), and not on a chip (Rung 7).</li>
+  </ul>
+</section>
+
+<section id="business">
+  <h2>For business</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Who</th><th>What this means for them</th></tr></thead>
+    <tr><td>CEO</td><td>A small owned system can get better on your own cases without a model vendor in the loop, and it shows its working: every kept change and the exam it won.</td></tr>
+    <tr><td>Finance</td><td>No per-call fee, no seats, no retraining contract. It runs in whole numbers on a machine you have. The cost case below uses your own numbers.</td></tr>
+    <tr><td>Operations</td><td>It adapts to how your people actually write, on your own labelled samples, and nothing changes unless a change wins on fresh cases.</td></tr>
+    <tr><td>CTO / CISO</td><td>No model and no network. Every cycle is logged, and the whole run re-derives byte for byte from pinned files, in CI and in a browser.</td></tr>
+  </table></div>
+  <h3>The cost case for one process</h3>
+  <p class="muted">Your numbers in; sourced figures for the rest: UK median wage, CPI, electricity, and today's seat and API prices, each source listed. These are your costs. No price of ours appears. The starting values are an example process: a team keying handwritten numbers off paper by hand. Put in your own.</p>
+  <div class="controls">
+    <label>hours a week <input id="c-hours" type="number" min="0" max="168" value="20"></label>
+    <label>share taken off % <input id="c-share" type="number" min="0" max="100" value="50"></label>
+    <label>people <input id="c-seats" type="number" min="0" value="5"></label>
+    <label>cases a week <input id="c-cases" type="number" min="0" value="500"></label>
+    <label>years <input id="c-years" type="number" min="1" max="10" value="3"></label>
+  </div>
+  <p id="c-head" style="font-size:17px">…</p>
+  <div class="tablewrap"><table id="c-table"><thead><tr><th>Route</th><th>What it means</th><th>A year</th><th id="c-overh">Over the years</th></tr></thead><tbody></tbody></table></div>
+  <p id="c-note" class="muted" style="margin-top:8px"></p>
+  <h3>The case for the board</h3>
+  <p id="c-board"></p>
+  <h3>Questions buyers ask</h3>
+  <div class="tablewrap"><table>
+    <tr><td><b>Does it learn from our data?</b></td><td id="faq-learn">Loading…</td></tr>
+    <tr><td><b>Could it learn the wrong thing?</b></td><td>A change is kept only if it wins on fresh cases it has never seen, and the final judgement is on cases it never trained on at all. It can still only be as good as the labelled samples it is given, which is why the blind check is part of every run.</td></tr>
+    <tr><td><b>Is this a neural network training?</b></td><td>No. There are no weights learned by gradient and no model anywhere. The loop edits a few hundred readable patterns and two settings, and you can look at every one of them above.</td></tr>
+    <tr><td><b>How would we test it on our own data?</b></td><td>The same way as here: we seal the bars, split your labelled cases into a tune half and a blind half, run the loop on the tune half only, freeze the result by hash, and read the blind half once. The fee is due only if it beat your current way.</td></tr>
+    <tr><td><b>Our inputs are personal data. What about UK GDPR?</b></td><td>It runs where your data already is, so no model vendor or new processor is added and nothing is sent out. Your own data protection officer still signs off the use; no legal sign-off is claimed here.</td></tr>
+    <tr><td><b>What failed?</b></td><td id="faq-failed">Loading…</td></tr>
+    <tr><td><b>Who has done this for a client? Is it certified?</b></td><td>No client case study is published yet, and no certification is claimed. What you can check is that the record re-derives from pinned files, on GitHub's runner and in your browser.</td></tr>
+  </table></div>
+  <p style="margin-top:10px">Supplied by <a href="https://www.ai-nativesolutions.com" rel="noopener">AI Native Solutions</a>; contact through that site. Support, SLA, warranty and liability are agreed per deployment. The code is MIT and keeps running without us. Rung 1 is <a href="https://sjgant80-hub.github.io/settling-cell/">the settling cell</a>; the method is proven with buttons on <a href="https://sjgant80-hub.github.io/liveware/">Liveware</a>.</p>
+  <p class="muted" style="margin-top:8px">Sources, as read into the cost basis:</p>
+  <ul id="c-src" class="muted" style="font-size:13px"></ul>
+</section>
+</main>
+<footer>
+  <p>Data: Semeion Handwritten Digit, Semeion Research Center of Sciences of Communication, Rome, and Tattile, Brescia; UCI Machine Learning Repository, CC BY 4.0. The file is pinned by SHA-256 in <a href="CLAIMS.md">CLAIMS.md</a>.</p>
+  <p>The starting cell, its kernel, and the seeded rng and SHA-256 come from <a href="https://github.com/sjgant80-hub/settling-cell">settling-cell</a> (Rung 1), vendored byte for byte. The cell's energy follows Hopfield (1982) and Krotov &amp; Hopfield (2016).</p>
+  <p>Powered by the Konomi architecture, created by Thomas Frumkin.</p>
+  <p>MIT licence · <a href="https://github.com/sjgant80-hub/code-rsi">source</a> · Rung 2 of the geometric ladder.</p>
+</footer>
+<script type="module" src="app.mjs"></script>
+</body>
+</html>

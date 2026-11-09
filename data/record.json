@@ -1,0 +1,102 @@
+{
+ "record": {
+  "blind": 797,
+  "tune": 796,
+  "hashes": {
+   "s0": "095d33a8bb6d6393173b48279f60000aa2d9e3b1413abc2e18e87936dab73b88",
+   "star": "79007f139e93d4df52d0dd153fb3e404db745d78611e8089fc2fc1ecfa5adbdf",
+   "twin": "a8d1dcb674b1bc9855b85c7a8317d7a1cc78d102fe52cefca3ae1611f96e6f24"
+  },
+  "s0": {
+   "clean": 0.186951,
+   "cleanOne": 0.186951,
+   "n25": 0.070263,
+   "n25One": 0.06399
+  },
+  "star": {
+   "clean": 0.696361,
+   "cleanOne": 0.726474,
+   "n25": 0.599749,
+   "n25One": 0.589711
+  },
+  "twin": {
+   "clean": 0.678795,
+   "cleanOne": 0.700125,
+   "n25": 0.560853,
+   "n25One": 0.583438
+  },
+  "nnTune": 0.905897,
+  "lows": {
+   "R1": 0.471769,
+   "R2": 0.494354,
+   "R3noisy": -0.005019,
+   "R3clean": -0.048934,
+   "R4": 0.004391
+  },
+  "gate": {
+   "adaptive": true,
+   "fixed": true
+  },
+  "accepted": {
+   "adaptive": 140,
+   "fixed": 87
+  },
+  "unsettled": 0,
+  "settles": 4782,
+  "hash": "f9ec03df3ec495d0b84d50a5ecf4b42cf293f9a3a8b5c9e21c9ebe3b18e8a039"
+ },
+ "verdicts": [
+  {
+   "id": "R1",
+   "what": "S* against S0, settling clean blind digits: 95% lower bound",
+   "measured": 0.471769,
+   "bar": "above 0",
+   "pass": true
+  },
+  {
+   "id": "R2",
+   "what": "S* against S0 with 25% of the pixels replaced: 95% lower bound",
+   "measured": 0.494354,
+   "bar": "above 0",
+   "pass": true
+  },
+  {
+   "id": "R3",
+   "what": "S* settling against S* read in one step: lower bound at 25% noise, and clean",
+   "measured": [
+    -0.005019,
+    -0.048934
+   ],
+   "bar": "above 0 at 25% noise and above -0.005 clean",
+   "pass": false
+  },
+  {
+   "id": "R4",
+   "what": "S* against the frozen-weights twin, clean and 25% noise pooled: lower bound",
+   "measured": 0.004391,
+   "bar": "above 0",
+   "pass": true
+  },
+  {
+   "id": "R6",
+   "what": "the gate held both ways on every cycle of both runs",
+   "measured": [
+    true,
+    true
+   ],
+   "bar": "true and true",
+   "pass": true
+  },
+  {
+   "id": "R9",
+   "what": "settles on the blind half that did not stop",
+   "measured": 0,
+   "bar": "none",
+   "pass": true
+  }
+ ],
+ "runs": {
+  "adaptive": "399a0fcc25da47816cadd9a8980b89451906b2057e569de32b82bfe28aa33ea3",
+  "fixed": "a0cdd78949d80092f7a1ec731f1fe55504dbfaeec2989231f12c24c6ef1e157e"
+ }
+}

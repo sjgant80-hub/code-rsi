@@ -1,0 +1,17 @@
+CODE RSI — credits and provenance
+
+Data: Semeion Handwritten Digit. Semeion Research Center of Sciences of Communication, via Sersale 117, 00128 Rome,
+Italy; Tattile, Via Gaetano Donizetti 1-3-5, 25030 Mairano (Brescia), Italy. UCI Machine Learning Repository, CC BY 4.0.
+data/semeion.data and data/semeion.names are the files from the UCI archive, unchanged; the data's SHA-256 is sealed in
+CLAIMS.md.
+
+The starting cell and its kernel are Rung 1, sjgant80-hub/settling-cell, vendored byte for byte under
+vendor/settling-cell/ (with the seed-library rng and SHA-256 that settling-cell vendored from sjgant80-hub/living-seed).
+The cell's energy follows J. J. Hopfield (1982) and D. Krotov & J. J. Hopfield (2016).
+
+Powered by the Konomi architecture, created by Thomas Frumkin.
+
+vendor/liveware/mintcase.mjs and basis.json: from sjgant80-hub/liveware at 48205c7, byte for byte; basis.json carries
+the source of every figure it holds. Every vendored file's SHA-256 is pinned in vendor/SOURCES.json.
+
+This repository's own code (src/, app.mjs, worker.mjs, the tests and tools) is MIT licensed (LICENSE).
